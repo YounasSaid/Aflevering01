@@ -1,4 +1,6 @@
-﻿using RepositoryContracts;
+using RepositoryContracts;
+using CLI.UI.ManageUsers;
+using CLI.UI.ManagePosts;
 
 namespace CLI.UI;
 
@@ -81,13 +83,16 @@ public class CliApp
             switch (choice)
             {
                 case "1":
-                    await CreateUserAsync();
+                    var createUserView = new CreateUserView(userRepository);
+                    await createUserView.CreateUserAsync();
                     break;
                 case "2":
-                    await ViewAllUsersAsync();
+                    var listUsersView = new ListUsersView(userRepository);
+                    await listUsersView.ViewAllUsersAsync();
                     break;
                 case "3":
-                    await ViewSpecificUserAsync();
+                    var manageUsersView = new ManageUsersView(userRepository);
+                    await manageUsersView.ViewSpecificUserAsync();
                     break;
                 case "0":
                     back = true;
@@ -115,13 +120,16 @@ public class CliApp
             switch (choice)
             {
                 case "1":
-                    await CreatePostAsync();
+                    var createPostView = new CreatePostView(postRepository, userRepository);
+                    await createPostView.CreatePostAsync();
                     break;
                 case "2":
-                    await ViewPostsOverviewAsync();
+                    var listPostsView = new ListPostsView(postRepository);
+                    await listPostsView.ViewPostsOverviewAsync();
                     break;
                 case "3":
-                    await ViewSpecificPostAsync();
+                    var singlePostView = new SinglePostView(postRepository, userRepository, commentRepository);
+                    await singlePostView.ViewSpecificPostAsync();
                     break;
                 case "0":
                     back = true;
@@ -163,163 +171,7 @@ public class CliApp
         }
     }
 
-    // User methods
-    private async Task CreateUserAsync()
-    {
-        Console.WriteLine("\n--- Create New User ---");
-        Console.Write("Enter username: ");
-        string? username = Console.ReadLine();
-        Console.Write("Enter password: ");
-        string? password = Console.ReadLine();
-
-        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-        {
-            Console.WriteLine("Username and password cannot be empty!");
-            return;
-        }
-
-        try
-        {
-            var user = new Entities.User { UserName = username, Password = password };
-            var createdUser = await userRepository.AddAsync(user);
-            Console.WriteLine($"User created successfully with ID: {createdUser.Id}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error creating user: {ex.Message}");
-        }
-    }
-
-    private async Task ViewAllUsersAsync()
-    {
-        Console.WriteLine("\n--- All Users ---");
-        var users = userRepository.GetMany().ToList();
-        
-        if (!users.Any())
-        {
-            Console.WriteLine("No users found.");
-            return;
-        }
-
-        foreach (var user in users)
-        {
-            Console.WriteLine($"ID: {user.Id}, Username: {user.UserName}");
-        }
-    }
-
-    private async Task ViewSpecificUserAsync()
-    {
-        Console.Write("Enter user ID: ");
-        if (int.TryParse(Console.ReadLine(), out int userId))
-        {
-            try
-            {
-                var user = await userRepository.GetSingleAsync(userId);
-                Console.WriteLine($"\nUser Details:");
-                Console.WriteLine($"ID: {user.Id}");
-                Console.WriteLine($"Username: {user.UserName}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-            }
-        }
-        else
-        {
-            Console.WriteLine("Invalid user ID.");
-        }
-    }
-
-    // Post methods
-    private async Task CreatePostAsync()
-    {
-        Console.WriteLine("\n--- Create New Post ---");
-        Console.Write("Enter post title: ");
-        string? title = Console.ReadLine();
-        Console.Write("Enter post body: ");
-        string? body = Console.ReadLine();
-        Console.Write("Enter user ID (author): ");
-
-        if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(body))
-        {
-            Console.WriteLine("Title and body cannot be empty!");
-            return;
-        }
-
-        if (int.TryParse(Console.ReadLine(), out int userId))
-        {
-            try
-            {
-                // Verify user exists
-                await userRepository.GetSingleAsync(userId);
-                
-                var post = new Entities.Post { Title = title, Body = body, UserId = userId };
-                var createdPost = await postRepository.AddAsync(post);
-                Console.WriteLine($"Post created successfully with ID: {createdPost.Id}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error creating post: {ex.Message}");
-            }
-        }
-        else
-        {
-            Console.WriteLine("Invalid user ID.");
-        }
-    }
-
-    private async Task ViewPostsOverviewAsync()
-    {
-        Console.WriteLine("\n--- Posts Overview ---");
-        var posts = postRepository.GetMany().ToList();
-        
-        if (!posts.Any())
-        {
-            Console.WriteLine("No posts found.");
-            return;
-        }
-
-        foreach (var post in posts)
-        {
-            Console.WriteLine($"[{post.Id}] {post.Title}");
-        }
-    }
-
-    private async Task ViewSpecificPostAsync()
-    {
-        Console.Write("Enter post ID: ");
-        if (int.TryParse(Console.ReadLine(), out int postId))
-        {
-            try
-            {
-                var post = await postRepository.GetSingleAsync(postId);
-                var author = await userRepository.GetSingleAsync(post.UserId);
-                var comments = commentRepository.GetMany().Where(c => c.PostId == postId).ToList();
-
-                Console.WriteLine($"\n=== Post Details ===");
-                Console.WriteLine($"Title: {post.Title}");
-                Console.WriteLine($"Author: {author.UserName}");
-                Console.WriteLine($"Body: {post.Body}");
-                Console.WriteLine($"\nComments ({comments.Count}):");
-                
-                foreach (var comment in comments)
-                {
-                    var commentAuthor = await userRepository.GetSingleAsync(comment.UserId);
-                    Console.WriteLine($"- {commentAuthor.UserName}: {comment.Body}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-            }
-        }
-        else
-        {
-            Console.WriteLine("Invalid post ID.");
-        }
-    }
-
-    // Comment methods
+    // Comment methods (keeping these here for now)
     private async Task AddCommentToPostAsync()
     {
         Console.WriteLine("\n--- Add Comment to Post ---");
