@@ -2,11 +2,11 @@ using RepositoryContracts;
 
 namespace CLI.UI.ManageUsers;
 
-public class ManageUsersView
+public class SingleUserView
 {
     private readonly IUserRepository userRepository;
 
-    public ManageUsersView(IUserRepository userRepository)
+    public SingleUserView(IUserRepository userRepository)
     {
         this.userRepository = userRepository;
     }

@@ -1,3 +1,4 @@
+using CLI.UI.ManageComments;
 using RepositoryContracts;
 using CLI.UI.ManageUsers;
 using CLI.UI.ManagePosts;
@@ -91,7 +92,7 @@ public class CliApp
                     await listUsersView.ViewAllUsersAsync();
                     break;
                 case "3":
-                    var manageUsersView = new ManageUsersView(userRepository);
+                    var manageUsersView = new SingleUserView(userRepository);
                     await manageUsersView.ViewSpecificUserAsync();
                     break;
                 case "0":
@@ -156,10 +157,12 @@ public class CliApp
             switch (choice)
             {
                 case "1":
-                    await AddCommentToPostAsync();
+                    var addCommentView = new AddCommentView( commentRepository,postRepository,userRepository);
+                    await addCommentView.AddCommentToPostAsync();
                     break;
                 case "2":
-                    await ViewAllCommentsAsync();
+                    var listCommentsView = new ListCommentsView(commentRepository, postRepository, userRepository);
+                    await listCommentsView.ViewAllCommentsAsync();
                     break;
                 case "0":
                     back = true;
@@ -171,76 +174,5 @@ public class CliApp
         }
     }
 
-    // Comment methods (keeping these here for now)
-    private async Task AddCommentToPostAsync()
-    {
-        Console.WriteLine("\n--- Add Comment to Post ---");
-        Console.Write("Enter post ID: ");
-        if (int.TryParse(Console.ReadLine(), out int postId))
-        {
-            try
-            {
-                // Verify post exists
-                await postRepository.GetSingleAsync(postId);
-                
-                Console.Write("Enter your user ID: ");
-                if (int.TryParse(Console.ReadLine(), out int userId))
-                {
-                    // Verify user exists
-                    await userRepository.GetSingleAsync(userId);
-                    
-                    Console.Write("Enter comment: ");
-                    string? body = Console.ReadLine();
-                    
-                    if (string.IsNullOrWhiteSpace(body))
-                    {
-                        Console.WriteLine("Comment cannot be empty!");
-                        return;
-                    }
-
-                    var comment = new Entities.Comment { Body = body, UserId = userId, PostId = postId };
-                    var createdComment = await commentRepository.AddAsync(comment);
-                    Console.WriteLine($"Comment added successfully with ID: {createdComment.Id}");
-                }
-                else
-                {
-                    Console.WriteLine("Invalid user ID.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-            }
-        }
-        else
-        {
-            Console.WriteLine("Invalid post ID.");
-        }
-    }
-
-    private async Task ViewAllCommentsAsync()
-    {
-        Console.WriteLine("\n--- All Comments ---");
-        var comments = commentRepository.GetMany().ToList();
-        
-        if (!comments.Any())
-        {
-            Console.WriteLine("No comments found.");
-            return;
-        }
-
-        foreach (var comment in comments)
-        {
-            try
-            {
-                var author = await userRepository.GetSingleAsync(comment.UserId);
-                var post = await postRepository.GetSingleAsync(comment.PostId);
-                Console.WriteLine($"[{comment.Id}] {author.UserName} on '{post.Title}': {comment.Body}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Comment ID {comment.Id}: Error loading details - {ex.Message}");
-            }
-        }
-    }
+   
 }

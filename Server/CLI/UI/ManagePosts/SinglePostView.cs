@@ -18,34 +18,33 @@ public class SinglePostView
     public async Task ViewSpecificPostAsync()
     {
         Console.Write("Enter post ID: ");
-        if (int.TryParse(Console.ReadLine(), out int postId))
+        
+        if (int.TryParse(Console.ReadLine(),out int postId))
         {
             try
             {
                 var post = await postRepository.GetSingleAsync(postId);
                 var author = await userRepository.GetSingleAsync(post.UserId);
-                var comments = commentRepository.GetMany().Where(c => c.PostId == postId).ToList();
-
-                Console.WriteLine($"\n=== Post Details ===");
-                Console.WriteLine($"Title: {post.Title}");
-                Console.WriteLine($"Author: {author.UserName}");
-                Console.WriteLine($"Body: {post.Body}");
-                Console.WriteLine($"\nComments ({comments.Count}):");
                 
-                foreach (var comment in comments)
-                {
-                    var commentAuthor = await userRepository.GetSingleAsync(comment.UserId);
-                    Console.WriteLine($"- {commentAuthor.UserName}: {comment.Body}");
-                }
+                Console.WriteLine($"\n post Details:");
+                Console.WriteLine($"Author: {author.UserName}");
+                Console.WriteLine($"ID: {post.Id}");
+                Console.WriteLine($"Title: {post.Title}");
+                Console.WriteLine($"Body: {post.Body}");
+                
+                
+
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Error: {ex.Message}"); 
             }
         }
         else
         {
-            Console.WriteLine("Invalid post ID.");
+            Console.WriteLine($"Invalid post ID");
+            
         }
+        
     }
 }
