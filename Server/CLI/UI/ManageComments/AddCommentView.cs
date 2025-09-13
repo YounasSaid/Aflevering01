@@ -26,8 +26,7 @@ public class AddCommentView
             Console.WriteLine("Invalid post ID.");
             return;
         }
-
-        // Hent og tjek at posten findes
+        
         var post = await postRepository.GetSingleAsync(postId);
         if (post is null)
         {
@@ -41,8 +40,7 @@ public class AddCommentView
             Console.WriteLine("Invalid user ID.");
             return;
         }
-
-        // Hent og tjek at brugeren findes
+        
         var user = await userRepository.GetSingleAsync(userId);
         if (user is null)
         {
