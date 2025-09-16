@@ -29,24 +29,32 @@ public class CliApp
             ShowMainMenu();
             string? choice = Console.ReadLine();
 
-            switch (choice)
+            try
             {
-                case "1":
-                    await ManageUsersAsync();
-                    break;
-                case "2":
-                    await ManagePostsAsync();
-                    break;
-                case "3":
-                    await ManageCommentsAsync();
-                    break;
-                case "0":
-                    running = false;
-                    Console.WriteLine("Goodbye!");
-                    break;
-                default:
-                    Console.WriteLine("Invalid choice. Please try again.");
-                    break;
+                switch (choice)
+                {
+                    case "1":
+                        await ManageUsersAsync();
+                        break;
+                    case "2":
+                        await ManagePostsAsync();
+                        break;
+                    case "3":
+                        await ManageCommentsAsync();
+                        break;
+                    case "0":
+                        running = false;
+                        Console.WriteLine("Goodbye!");
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice. Please try again.");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                Console.WriteLine("Please try again.");
             }
             
             if (running)
@@ -81,26 +89,34 @@ public class CliApp
             Console.Write("Choose an option: ");
 
             string? choice = Console.ReadLine();
-            switch (choice)
+            try
             {
-                case "1":
-                    var createUserView = new CreateUserView(userRepository);
-                    await createUserView.CreateUserAsync();
-                    break;
-                case "2":
-                    var listUsersView = new ListUsersView(userRepository);
-                    await listUsersView.ViewAllUsersAsync();
-                    break;
-                case "3":
-                    var manageUsersView = new SingleUserView(userRepository);
-                    await manageUsersView.ViewSpecificUserAsync();
-                    break;
-                case "0":
-                    back = true;
-                    break;
-                default:
-                    Console.WriteLine("Invalid choice. Please try again.");
-                    break;
+                switch (choice)
+                {
+                    case "1":
+                        var createUserView = new CreateUserView(userRepository);
+                        await createUserView.CreateUserAsync();
+                        break;
+                    case "2":
+                        var listUsersView = new ListUsersView(userRepository);
+                        await listUsersView.ViewAllUsersAsync();
+                        break;
+                    case "3":
+                        var manageUsersView = new SingleUserView(userRepository);
+                        await manageUsersView.ViewSpecificUserAsync();
+                        break;
+                    case "0":
+                        back = true;
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice. Please try again.");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                Console.WriteLine("Please try again.");
             }
         }
     }
@@ -118,26 +134,34 @@ public class CliApp
             Console.Write("Choose an option: ");
 
             string? choice = Console.ReadLine();
-            switch (choice)
+            try
             {
-                case "1":
-                    var createPostView = new CreatePostView(postRepository, userRepository);
-                    await createPostView.CreatePostAsync();
-                    break;
-                case "2":
-                    var listPostsView = new ListPostsView(postRepository);
-                    await listPostsView.ViewPostsOverviewAsync();
-                    break;
-                case "3":
-                    var singlePostView = new SinglePostView(postRepository, userRepository, commentRepository);
-                    await singlePostView.ViewSpecificPostAsync();
-                    break;
-                case "0":
-                    back = true;
-                    break;
-                default:
-                    Console.WriteLine("Invalid choice. Please try again.");
-                    break;
+                switch (choice)
+                {
+                    case "1":
+                        var createPostView = new CreatePostView(postRepository, userRepository);
+                        await createPostView.CreatePostAsync();
+                        break;
+                    case "2":
+                        var listPostsView = new ListPostsView(postRepository);
+                        await listPostsView.ViewPostsOverviewAsync();
+                        break;
+                    case "3":
+                        var singlePostView = new SinglePostView(postRepository, userRepository, commentRepository);
+                        await singlePostView.ViewSpecificPostAsync();
+                        break;
+                    case "0":
+                        back = true;
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice. Please try again.");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                Console.WriteLine("Please try again.");
             }
         }
     }
@@ -154,25 +178,31 @@ public class CliApp
             Console.Write("Choose an option: ");
 
             string? choice = Console.ReadLine();
-            switch (choice)
+            try
             {
-                case "1":
-                    var addCommentView = new AddCommentView( commentRepository,postRepository,userRepository);
-                    await addCommentView.AddCommentToPostAsync();
-                    break;
-                case "2":
-                    var listCommentsView = new ListCommentsView(commentRepository, postRepository, userRepository);
-                    await listCommentsView.ViewAllCommentsAsync();
-                    break;
-                case "0":
-                    back = true;
-                    break;
-                default:
-                    Console.WriteLine("Invalid choice. Please try again.");
-                    break;
+                switch (choice)
+                {
+                    case "1":
+                        var addCommentView = new AddCommentView(commentRepository, postRepository, userRepository);
+                        await addCommentView.AddCommentToPostAsync();
+                        break;
+                    case "2":
+                        var listCommentsView = new ListCommentsView(commentRepository, postRepository, userRepository);
+                        await listCommentsView.ViewAllCommentsAsync();
+                        break;
+                    case "0":
+                        back = true;
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice. Please try again.");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                Console.WriteLine("Please try again.");
             }
         }
     }
-
-   
 }

@@ -1,4 +1,4 @@
-﻿using RepositoryContracts;
+using RepositoryContracts;
 
 namespace CLI.UI.ManageComments;
 
@@ -27,8 +27,12 @@ public class AddCommentView
             return;
         }
         
-        var post = await postRepository.GetSingleAsync(postId);
-        if (post is null)
+        try
+        {
+            var post = await postRepository.GetSingleAsync(postId);
+            // Post found, continue...
+        }
+        catch (Exception ex)
         {
             Console.WriteLine($"Post with ID {postId} was not found.");
             return;
@@ -41,8 +45,12 @@ public class AddCommentView
             return;
         }
         
-        var user = await userRepository.GetSingleAsync(userId);
-        if (user is null)
+        try
+        {
+            var user = await userRepository.GetSingleAsync(userId);
+            // User found, continue...
+        }
+        catch (Exception ex)
         {
             Console.WriteLine($"User with ID {userId} was not found.");
             return;
@@ -73,6 +81,4 @@ public class AddCommentView
             Console.WriteLine($"Failed to add comment: {ex.Message}");
         }
     }
-
-    
 }
