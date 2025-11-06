@@ -1,0 +1,100 @@
+@page "/create-post"
+@inject IPostService PostService
+@inject NavigationManager NavManager
+@using ApiContracts
+@using BlazorApp.Services
+
+<h3>Create New Post</h3>
+
+@* Vis fejlbesked hvis der er en fejl *@
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@* Vis success besked når post er oprettet *@
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success">@successMessage</div>
+}
+
+@* Input felt til title *@
+<div class="mb-3">
+    <label>Title:</label>
+    <input type="text" class="form-control" @bind="title" placeholder="Enter post title" />
+</div>
+
+@* Input felt til body *@
+<div class="mb-3">
+    <label>Body:</label>
+    <textarea class="form-control" @bind="body" rows="5" placeholder="Enter post content"></textarea>
+</div>
+
+@* Input felt til user ID (hardcoded til 1 indtil vi får login system) *@
+<div class="mb-3">
+    <label>User ID:</label>
+    <input type="number" class="form-control" @bind="userId" />
+    <small class="text-muted">For now, use User ID 1 (will be automatic after login is implemented)</small>
+</div>
+
+@* Knap til at oprette post *@
+<button class="btn btn-primary" @onclick="CreatePostAsync">Create Post</button>
+<button class="btn btn-secondary" @onclick="GoToPosts">View All Posts</button>
+
+@code {
+    // Properties til at holde input data fra formular
+    private string title = "";
+    private string body = "";
+    private int userId = 1;  // Hardcoded til 1 indtil vi får login system
+    
+    // Properties til at vise beskeder til brugeren
+    private string errorMessage = "";
+    private string successMessage = "";
+
+    // Metode der kaldes når "Create Post" knappen klikkes
+    private async Task CreatePostAsync()
+    {
+        // Step 1: Reset alle beskeder
+        errorMessage = "";
+        successMessage = "";
+        
+        try
+        {
+            // Step 2: Valider at title og body ikke er tomme
+            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(body))
+            {
+                errorMessage = "Title and body cannot be empty!";
+                return;  // Stop metoden her
+            }
+            
+            // Step 3: Opret CreatePostDto objekt med data fra formular
+            var newPost = new CreatePostDto
+            {
+                Title = title,
+                Body = body,
+                UserId = userId
+            };
+            
+            // Step 4: Kald PostService til at oprette post via Web API
+            PostDto created = await PostService.AddPostAsync(newPost);
+            
+            // Step 5: Success! Vis besked til brugeren
+            successMessage = $"Post '{created.Title}' created successfully with ID: {created.Id}";
+            
+            // Step 6: Reset input felterne så de er tomme igen
+            title = "";
+            body = "";
+        }
+        catch (Exception e)
+        {
+            // Step 7: Hvis noget går galt, vis fejlbeskeden
+            errorMessage = $"Error: {e.Message}";
+        }
+    }
+    
+    // Navigate til posts liste
+    private void GoToPosts()
+    {
+        NavManager.NavigateTo("/posts");
+    }
+}

@@ -1,0 +1,84 @@
+@page "/create-user"
+@inject IUserService UserService
+@inject NavigationManager NavManager
+@using ApiContracts
+@using BlazorApp.Services
+
+<h3>Create New User</h3>
+
+@* Vis fejlbesked hvis der er en fejl *@
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@* Vis success besked når bruger er oprettet *@
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success">@successMessage</div>
+}
+
+@* Input felt til username *@
+<div class="mb-3">
+    <label>Username:</label>
+    <input type="text" class="form-control" @bind="username" placeholder="Enter username" />
+</div>
+
+@* Input felt til password *@
+<div class="mb-3">
+    <label>Password:</label>
+    <input type="password" class="form-control" @bind="password" placeholder="Enter password" />
+</div>
+
+@* Knap til at oprette bruger *@
+<button class="btn btn-primary" @onclick="CreateUserAsync">Create User</button>
+
+@code {
+    // Properties til at holde input data fra formular
+    private string username = "";
+    private string password = "";
+    
+    // Properties til at vise beskeder til brugeren
+    private string errorMessage = "";
+    private string successMessage = "";
+
+    // Metode der kaldes når "Create User" knappen klikkes
+    private async Task CreateUserAsync()
+    {
+        // Step 1: Reset alle beskeder
+        errorMessage = "";
+        successMessage = "";
+        
+        try
+        {
+            // Step 2: Valider at username og password ikke er tomme
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                errorMessage = "Username and password cannot be empty!";
+                return;  // Stop metoden her
+            }
+            
+            // Step 3: Opret CreateUserDto objekt med data fra formular
+            var newUser = new CreateUserDto
+            {
+                UserName = username,
+                Password = password
+            };
+            
+            // Step 4: Kald UserService til at oprette brugeren via Web API
+            UserDto created = await UserService.AddUserAsync(newUser);
+            
+            // Step 5: Success! Vis besked til brugeren
+            successMessage = $"User '{created.UserName}' created successfully with ID: {created.Id}";
+            
+            // Step 6: Reset input felterne så de er tomme igen
+            username = "";
+            password = "";
+        }
+        catch (Exception e)
+        {
+            // Step 7: Hvis noget går galt, vis fejlbeskeden
+            errorMessage = $"Error: {e.Message}";
+        }
+    }
+}

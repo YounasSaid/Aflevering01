@@ -1,0 +1,183 @@
+@page "/posts/{PostId:int}"
+@inject IPostService PostService
+@inject ICommentService CommentService
+@inject NavigationManager NavManager
+@using ApiContracts
+@using BlazorApp.Services
+
+<h3>Post Details</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@if (isLoading)
+{
+    <p><em>Loading post...</em></p>
+}
+else if (post is null)
+{
+    <p>Post not found.</p>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="mb-0">@post.Title</h4>
+            <small class="text-muted">By User ID: @post.UserId | Post ID: @post.Id</small>
+        </div>
+        <div class="card-body">
+            <p>@post.Body</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Comments (@comments.Count())</h5>
+        </div>
+        <div class="card-body">
+            @if (comments.Any())
+            {
+                <div class="list-group mb-3">
+                    @foreach (var c in comments)
+                    {
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <small class="text-muted">User ID: @c.UserId</small>
+                                <small class="text-muted">Comment ID: @c.Id</small>
+                            </div>
+                            <p class="mb-1">@c.Body</p>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">No comments yet. Be the first to comment!</p>
+            }
+
+            <hr />
+            <h6>Add a Comment</h6>
+
+            @if (!string.IsNullOrEmpty(commentErrorMessage))
+            {
+                <div class="alert alert-danger">@commentErrorMessage</div>
+            }
+            @if (!string.IsNullOrEmpty(commentSuccessMessage))
+            {
+                <div class="alert alert-success">@commentSuccessMessage</div>
+            }
+
+            <div class="mb-3">
+                <label>User ID:</label>
+                <input type="number" class="form-control" @bind="commentUserId" />
+                <small class="text-muted">Temporary manual entry (will be auto after login)</small>
+            </div>
+
+            <div class="mb-3">
+                <label>Comment:</label>
+                <textarea class="form-control" rows="3" placeholder="Write your comment..."
+                          @bind="commentBody"></textarea>
+            </div>
+
+            <button class="btn btn-primary" @onclick="AddCommentAsync">Add Comment</button>
+        </div>
+    </div>
+}
+
+<div class="mt-3">
+    <button class="btn btn-secondary" @onclick="BackToPosts">
+        Back to Posts List
+    </button>
+</div>
+
+@code {
+    // Route parameter
+    [Parameter] public int PostId { get; set; }
+
+    // Data
+    private PostDto? post;
+    private IEnumerable<CommentDto> comments = Enumerable.Empty<CommentDto>();
+
+    // UI state
+    private bool isLoading = true;
+    private string errorMessage = "";
+    private string commentErrorMessage = "";
+    private string commentSuccessMessage = "";
+
+    // Form
+    private string commentBody = "";
+    private int commentUserId = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPostAsync();
+        await LoadCommentsAsync();
+    }
+
+    private async Task LoadPostAsync()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = "";
+            post = await PostService.GetSingleAsync(PostId);
+        }
+        catch (Exception e)
+        {
+            errorMessage = $"Error loading post: {e.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadCommentsAsync()
+    {
+        try
+        {
+            comments = await CommentService.GetManyAsync(postId: PostId);
+        }
+        catch (Exception e)
+        {
+            // Vi ignorerer fejl her, så selve posten stadig vises
+            Console.WriteLine($"Error loading comments: {e.Message}");
+        }
+    }
+
+    private async Task AddCommentAsync()
+    {
+        commentErrorMessage = "";
+        commentSuccessMessage = "";
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(commentBody))
+            {
+                commentErrorMessage = "Comment cannot be empty!";
+                return;
+            }
+
+            var dto = new CreateCommentDto
+            {
+                Body = commentBody,
+                UserId = commentUserId,
+                PostId = PostId
+            };
+
+            await CommentService.AddCommentAsync(dto);
+            commentSuccessMessage = "Comment added successfully!";
+            commentBody = "";
+
+            await LoadCommentsAsync();
+        }
+        catch (Exception e)
+        {
+            commentErrorMessage = $"Error: {e.Message}";
+        }
+    }
+
+    private void BackToPosts() => NavManager.NavigateTo("/posts");
+}

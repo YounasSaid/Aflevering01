@@ -1,0 +1,132 @@
+@page "/posts"
+@inject IPostService PostService
+@inject NavigationManager NavManager
+@using ApiContracts
+@using BlazorApp.Services
+
+<h3>All Posts</h3>
+
+@* Vis fejlbesked hvis der er en fejl *@
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@* Loading besked mens data hentes *@
+@if (isLoading)
+{
+    <p><em>Loading posts...</em></p>
+}
+else if (posts == null || !posts.Any())
+{
+    <p>No posts found. <a href="/create-post">Create the first post!</a></p>
+}
+else
+{
+    @* Søge felt til at filtrere posts *@
+    <div class="mb-3">
+        <input type="text" class="form-control" @bind="searchTitle" @bind:event="oninput" 
+               placeholder="Search by title..." />
+    </div>
+    
+    @* Liste af posts *@
+    <div class="list-group">
+        @foreach (var post in FilteredPosts)
+        {
+            <div class="list-group-item list-group-item-action" @onclick="() => ViewPost(post.Id)" 
+                 style="cursor: pointer;">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">@post.Title</h5>
+                    <small>ID: @post.Id</small>
+                </div>
+                <p class="mb-1">@GetPreview(post.Body)</p>
+                <small>By User ID: @post.UserId</small>
+            </div>
+        }
+    </div>
+}
+
+<div class="mt-3">  
+    <button class="btn btn-primary" @onclick="CreateNewPost">
+        Create New Post
+    </button>
+</div>
+
+@code {
+    // Liste af alle posts
+    private IEnumerable<PostDto>? posts;
+    
+    // Loading state
+    private bool isLoading = true;
+    
+    // Fejlbesked
+    private string errorMessage = "";
+    
+    // Søge filter
+    private string searchTitle = "";
+    
+    // Filtrerede posts baseret på søgning
+    private IEnumerable<PostDto> FilteredPosts
+    {
+        get
+        {
+            if (posts == null) return Enumerable.Empty<PostDto>();
+            
+            if (string.IsNullOrWhiteSpace(searchTitle))
+            {
+                return posts;
+            }
+            
+            return posts.Where(p => p.Title.Contains(searchTitle, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    // Når siden loader, hent alle posts
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPostsAsync();
+    }
+    
+    // Hent posts fra Web API
+    private async Task LoadPostsAsync()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = "";
+            
+            // Kald service til at hente alle posts
+            posts = await PostService.GetManyAsync();
+        }
+        catch (Exception e)
+        {
+            errorMessage = $"Error loading posts: {e.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    // Navigate til post details side
+    private void ViewPost(int postId)
+    {
+        NavManager.NavigateTo($"/posts/{postId}");
+    }
+    
+    // Få preview af post body (første 100 tegn)
+    private string GetPreview(string body)
+    {
+        if (string.IsNullOrEmpty(body)) return "";
+        
+        return body.Length > 100 
+            ? body.Substring(0, 100) + "..." 
+            : body;
+    }
+    
+    // Navigate til create post side
+    private void CreateNewPost()
+    {
+        NavManager.NavigateTo("/create-post");
+    }
+}

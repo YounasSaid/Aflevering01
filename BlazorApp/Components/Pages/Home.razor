@@ -1,0 +1,41 @@
+@page "/"
+@inject NavigationManager NavMgr
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+<h1>Welcome to the Forum!</h1>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="alert alert-success">
+            <h4>✓ Hello, @context.User.Identity?.Name!</h4>
+            <p>You are logged in and ready to go.</p>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="alert alert-warning">
+            <h4>⚠️ You are not logged in</h4>
+            <p>Please <a href="/login" style="font-weight: bold;">login</a> to access all features.</p>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+<p>This is a simple forum application where you can create users, posts, and comments.</p>
+
+<div class="mt-4">
+    <h3>Quick Links:</h3>
+    <div class="list-group">
+        <a href="/create-user" class="list-group-item list-group-item-action">
+            <strong>Create User</strong> - Register a new user account
+        </a>
+        <a href="/posts" class="list-group-item list-group-item-action">
+            <strong>View All Posts</strong> - Browse all forum posts
+        </a>
+        <a href="/create-post" class="list-group-item list-group-item-action">
+            <strong>Create Post</strong> - Share your thoughts and ideas
+        </a>
+    </div>
+</div>
+
+
