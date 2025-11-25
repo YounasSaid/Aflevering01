@@ -43,12 +43,7 @@ public class CommentsController : ControllerBase
             return BadRequest($"Post with id {request.PostId} not found");
         }
 
-        Comment comment = new()
-        {
-            Body = request.Body,
-            UserId = request.UserId,
-            PostId = request.PostId
-        };
+        Comment comment = new(request.Body, request.UserId, request.PostId);
 
         Comment created = await commentRepo.AddAsync(comment);
 

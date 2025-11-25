@@ -32,7 +32,7 @@ public class AddCommentView
             var post = await postRepository.GetSingleAsync(postId);
             // Post found, continue...
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Console.WriteLine($"Post with ID {postId} was not found.");
             return;
@@ -50,7 +50,7 @@ public class AddCommentView
             var user = await userRepository.GetSingleAsync(userId);
             // User found, continue...
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Console.WriteLine($"User with ID {userId} was not found.");
             return;
@@ -64,12 +64,8 @@ public class AddCommentView
             return;
         }
 
-        var comment = new Entities.Comment
-        {
-            Body = body.Trim(),
-            UserId = userId,
-            PostId = postId
-        };
+        // Brug den nye constructor
+        var comment = new Entities.Comment(body.Trim(), userId, postId);
 
         try
         {

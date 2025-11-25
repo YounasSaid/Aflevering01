@@ -51,12 +51,8 @@ public class CreatePostView
             return;
         }
         
-        var post = new Post 
-        { 
-            Title = title.Trim(), 
-            Body = body.Trim(), 
-            UserId = userId 
-        };
+        // Brug den nye constructor
+        var post = new Post(title.Trim(), body.Trim(), userId);
     
         try
         {

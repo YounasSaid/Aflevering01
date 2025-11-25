@@ -1,4 +1,4 @@
-﻿namespace Entities;
+namespace Entities;
 
 public class User
 {
@@ -6,7 +6,11 @@ public class User
     public string UserName { get; set; }
     public string Password { get; set; }
     
-    // Parameterless constructor for EFC (kommer senere)
+    // Navigation properties
+    public List<Post> Posts { get; set; } = new();
+    public List<Comment> Comments { get; set; } = new();
+    
+    // Parameterless constructor for EFC
     private User() { }
     
     // Constructor for creating new users

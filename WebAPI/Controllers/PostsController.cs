@@ -33,12 +33,8 @@ public class PostsController : ControllerBase
             return BadRequest($"User with id {request.UserId} not found");
         }
 
-        Post post = new()
-        {
-            Title = request.Title,
-            Body = request.Body,
-            UserId = request.UserId
-        };
+        // Brug den nye constructor
+        Post post = new(request.Title, request.Body, request.UserId);
 
         Post created = await postRepo.AddAsync(post);
 
